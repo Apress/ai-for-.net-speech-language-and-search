@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Definition App</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	
+	<style type="text/css">
+		body {
+		  padding-top: 50px;
+		}
+		.definition-app {
+		  padding: 40px 15px;
+		  text-align: center;
+		}
+	</style>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Definition App</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="definition-app">
+        <h1>What is your question?</h1>
+        <form>
+		  <div class="form-group">
+			<input type="text" class="form-control" id="utterance" placeholder='Eg., "define artificial intelligence"'>
+		  </div>
+		  <button type="submit" class="btn btn-primary">Go</button>
+		</form>
+		<br>
+		<div id="definition" class="well">Definition will appear here.</div>
+      </div>
+
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			// Do this when the form is submitted;
+			// that is, the "Go" button is clicked
+			$('form').submit(function(e) {
+				e.preventDefault(); // stop the default form submission behavior
+				var utterance = $('#utterance').val(); // text entered by user in the text-box
+				// Send the utterance to LUIS
+				$.get("https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/<app-id>?subscription-key=<key>&timezoneOffset=0.0&verbose=true&q=" + utterance, function(responseLuis) {
+					if (responseLuis.intents.length > 0) { // at least 1 intent was detected
+						if (responseLuis.topScoringIntent.intent === "GetDefinition") { // the top scoring intent is "GetDefinition"
+							if (responseLuis.entities.length > 0) { // at least 1 entity was detected
+								var phrase = responseLu-is.entities[0].entity; // ideally, we should check if entity type is "Phrase"
+								// Get the definition from Wikipedia
+								var wikipediaData = {
+									"format": "json",
+									"action":"query",
+									"prop": "extracts",
+									"exintro": "",
+									"explaintext": "",
+									"titles": phrase
+								};
+								$.get("https://en.wikipedia.org/w/api.php", wikipediaData, function(responseWikipedia) {
+									var pages = responseWik-ipedia.query.pages;
+									var summaryFirstLine = pages[Object.keys(pages)[0]].extract.split(". ")[0];
+									$('#defini-tion').html("<b>According to Wikipedia,</b><br>" + summaryFirstLine);
+								});
+							}
+							else { // no entity was detected
+								$('#definition').text("Sorry, I could not detect the phrase.");
+							}
+						}
+						else if (responseLuis.topScoringIntent.intent === "None") { // the top scoring intent is "None"
+							$('#definition').text("Did you ask the right question?");
+						}
+					}
+					else { // no intent was detected
+						$('#definition').text("Sorry, I did not understand.");
+					}
+				});
+			});
+		});
+	</script>
+
+  </body>
+</html>
