@@ -1,6 +1,6 @@
 # Apress Source Code
 
-This repository accompanies [*Artificial Intelligence for .NET: Speech, Language, and Search*](http://www.apress.com/9781484229484) by Nishith Pathak (Apress, ).
+This repository accompanies [*Artificial Intelligence for .NET: Speech, Language, and Search*](http://www.apress.com/9781484229484) by Nishith Pathak (Apress, 2017).
 
 [comment]: #cover
 
